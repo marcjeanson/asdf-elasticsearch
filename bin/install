@@ -80,11 +80,16 @@ function version() { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,
 get_download_url() {
   local install_type=$1
   local version=$2
-  local operating_system=$(uname -a)
+  local operating_system=$(uname -s)
+  local arch=$(uname -m)
 
   if [ $(version $version) -ge $(version "7.0.0") ]; then
-    if [[ "$operating_system" =~ "Darwin" ]]; then
-      echo "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$version-darwin-x86_64.tar.gz"
+    if [ "$operating_system" = "Darwin" ]; then
+      if [ "$arch" = "arm64" ] && [ $(version $version) -ge $(version "7.12.0") ]; then
+        echo "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$version-darwin-aarch64.tar.gz"
+      else
+        echo "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$version-darwin-x86_64.tar.gz"
+      fi
     else
       echo "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$version-linux-x86_64.tar.gz"
     fi
